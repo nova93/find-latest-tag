@@ -42,11 +42,14 @@ async function getLatestTag(
     sortTags,
 ) {
     if (releasesOnly) {
-        console.log((await octokit.repos.getLatestRelease({
+        const latestRelease = (await octokit.repos.getLatestRelease({
             owner,
             repo,
-        })).data.tag_name);
+        })).data.tag_name;
+        console.log("latestRelease: ", latestRelease);
+        return latestRelease;
     }
+
     const endpoint = octokit.repos.listTags;
     const pages = endpoint.endpoint.merge({
         owner: owner,
@@ -77,7 +80,6 @@ async function getLatestTag(
         }
         throw error;
     }
-    console.log("tags", tags);
     tags.sort(cmpTags);
     const [latestTag] = tags.slice(-1);
     return latestTag;
