@@ -41,9 +41,13 @@ async function getLatestTag(
     regex,
     sortTags,
 ) {
-    const endpoint = releasesOnly
-        ? octokit.repos.listReleases
-        : octokit.repos.listTags;
+    if (releasesOnly) {
+        console.log(octokit.repos.getLatestRelease({
+            owner,
+            repo,
+        }));
+    }
+    const endpoint = octokit.repos.listTags;
     const pages = endpoint.endpoint.merge({
         owner: owner,
         repo: repo,
@@ -52,7 +56,7 @@ async function getLatestTag(
 
     const tags = [];
     for await (const item of getItemsFromPages(pages)) {
-        const tag = releasesOnly ? item["tag_name"] : item["name"];
+        const tag = item["name"];
         if (!tag.startsWith(prefix)) {
             continue;
         }
@@ -67,7 +71,7 @@ async function getLatestTag(
     }
     if (tags.length === 0) {
         let error = `The repository "${owner}/${repo}" has no `;
-        error += releasesOnly ? "releases" : "tags";
+        error += "tags";
         if (prefix) {
             error += ` matching "${prefix}*"`;
         }
