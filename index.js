@@ -42,7 +42,7 @@ async function getLatestTag(
     sortTags,
 ) {
     if (releasesOnly) {
-        console.log(octokit.repos.getLatestRelease({
+        console.log(await octokit.repos.getLatestRelease({
             owner,
             repo,
         }));
