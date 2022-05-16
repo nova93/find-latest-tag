@@ -55,6 +55,7 @@ async function getLatestTag(owner, repo, releasesOnly, prefix, regex, sortTags) 
         }
         throw error;
     }
+    console.log('cmpTags', cmpTags);
     tags.sort(cmpTags);
     const [latestTag] = tags.slice(-1);
     return latestTag;
