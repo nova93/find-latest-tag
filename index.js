@@ -14,13 +14,18 @@ async function run() {
         const prefix = core.getInput("prefix") || "";
         const regex = core.getInput("regex") || null;
 
-        const releasesOnly = (core.getInput("releases-only") || "false").toLowerCase() === "true";
+        const releasesOnly =
+      (core.getInput("releases-only") || "false").toLowerCase() === "true";
 
         // It's somewhat safe to assume that the most recenly created release is actually latest.
-        const sortTagsDefault = (releasesOnly ? "false" : "true");
-        const sortTags = (core.getInput("sort-tags") || sortTagsDefault).toLowerCase() === "true";
+        const sortTagsDefault = releasesOnly ? "false" : "true";
+        const sortTags =
+      (core.getInput("sort-tags") || sortTagsDefault).toLowerCase() === "true";
 
-        core.setOutput("tag", await getLatestTag(owner, repo, releasesOnly, prefix, regex, sortTags));
+        core.setOutput(
+            "tag",
+            await getLatestTag(owner, repo, releasesOnly, prefix, regex, sortTags),
+        );
     } catch (error) {
         core.setFailed(error);
     }
@@ -28,13 +33,26 @@ async function run() {
 
 const octokit = new Octokit({auth: core.getInput("token") || null});
 
-async function getLatestTag(owner, repo, releasesOnly, prefix, regex, sortTags) {
-    const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
-    const pages = endpoint.endpoint.merge({"owner": owner, "repo": repo, "per_page": 100});
+async function getLatestTag(
+    owner,
+    repo,
+    releasesOnly,
+    prefix,
+    regex,
+    sortTags,
+) {
+    const endpoint = releasesOnly
+        ? octokit.repos.listReleases
+        : octokit.repos.listTags;
+    const pages = endpoint.endpoint.merge({
+        owner: owner,
+        repo: repo,
+        per_page: 100,
+    });
 
     const tags = [];
     for await (const item of getItemsFromPages(pages)) {
-        const tag = (releasesOnly ? item["tag_name"] : item["name"]);
+        const tag = releasesOnly ? item["tag_name"] : item["name"];
         if (!tag.startsWith(prefix)) {
             continue;
         }
@@ -55,7 +73,7 @@ async function getLatestTag(owner, repo, releasesOnly, prefix, regex, sortTags) 
         }
         throw error;
     }
-    console.log('cmpTags', cmpTags);
+    console.log("tags", tags);
     tags.sort(cmpTags);
     const [latestTag] = tags.slice(-1);
     return latestTag;
