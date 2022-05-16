@@ -45,7 +45,7 @@ async function getLatestTag(
         console.log(await octokit.repos.getLatestRelease({
             owner,
             repo,
-        }));
+        }).data.tag_name);
     }
     const endpoint = octokit.repos.listTags;
     const pages = endpoint.endpoint.merge({
